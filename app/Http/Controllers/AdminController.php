@@ -20,9 +20,7 @@ use Illuminate\View\View;
 
 class AdminController extends Controller
 {
-    public function __construct(private readonly StaffAssignmentService $staffAssignmentService)
-    {
-    }
+    public function __construct(private readonly StaffAssignmentService $staffAssignmentService) {}
 
     public function dashboard(): View
     {
@@ -41,7 +39,7 @@ class AdminController extends Controller
             ->withCount('services')
             ->orderBy('order')
             ->get(['id', 'name', 'description']);
-        
+
         $services = Service::query()
             ->with('category:id,name')
             ->orderBy('name')
@@ -232,7 +230,7 @@ class AdminController extends Controller
     public function updateServiceCategory(Request $request, ServiceCategory $category): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:service_categories,name,' . $category->id],
+            'name' => ['required', 'string', 'max:255', 'unique:service_categories,name,'.$category->id],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
 

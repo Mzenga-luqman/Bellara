@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Booking;
 use App\Mail\BookingReminder;
+use App\Models\Booking;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
 
 class SendBookingReminders extends Command
 {
@@ -33,7 +33,8 @@ class SendBookingReminders extends Command
         $tomorrow = Carbon::tomorrow();
 
         // Find all bookings for tomorrow that haven't been reminded yet
-        $bookings = Booking::where('booking_date', $tomorrow)
+        $bookings = Booking::query()
+            ->whereDate('booking_date', $tomorrow->toDateString())
             ->where('status', 'confirmed')
             ->whereNull('reminder_sent_at')
             ->with(['user', 'service', 'staff'])
@@ -43,10 +44,12 @@ class SendBookingReminders extends Command
 
         foreach ($bookings as $booking) {
             try {
-                if ($booking->user->email) {
-                    Mail::to($booking->user->email)->send(new BookingReminder($booking));
-                    
-                    // Mark reminder as sent
+                $recipientEmail = $booking->customer_email ?: $booking->user?->email;
+
+                if ($recipientEmail && filter_var($recipientEmail, FILTER_VALIDATE_EMAIL) !== false) {
+                    Mail::to($recipientEmail)->queue(new BookingReminder($booking));
+
+                    // Mark reminder as sent.
                     $booking->update(['reminder_sent_at' => now()]);
                     $count++;
                 }

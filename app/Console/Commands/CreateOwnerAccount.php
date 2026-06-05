@@ -84,6 +84,10 @@ class CreateOwnerAccount extends Command
             'email_verified_at' => now(),
         ]);
 
+        $user->forceFill([
+            'is_admin' => true,
+        ])->save();
+
         $this->info('Owner account created successfully.');
         $this->line('ID: '.$user->id);
         $this->line('Email: '.$user->email);

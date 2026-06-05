@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\BroadcastMessage;
 use App\Models\Booking;
 use App\Models\Broadcast;
 use App\Models\Review;
-use App\Mail\BroadcastMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -52,7 +52,7 @@ class AdminAnalyticsController extends Controller
             ->values();
 
         foreach ($customers as $email) {
-            Mail::to($email)->send(new BroadcastMessage($validated['title'], $validated['message']));
+            Mail::to($email)->queue(new BroadcastMessage($validated['title'], $validated['message']));
         }
 
         $broadcast->update([
@@ -76,6 +76,7 @@ class AdminAnalyticsController extends Controller
     public function approveReview(Review $review)
     {
         $review->update(['is_approved' => true]);
+
         return redirect()
             ->route('dashboard')
             ->with('admin_section', 'reviews')
@@ -85,6 +86,7 @@ class AdminAnalyticsController extends Controller
     public function rejectReview(Review $review)
     {
         $review->delete();
+
         return redirect()
             ->route('dashboard')
             ->with('admin_section', 'reviews')

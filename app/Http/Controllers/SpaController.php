@@ -15,9 +15,7 @@ use Illuminate\View\View;
 
 class SpaController extends Controller
 {
-    public function __construct(private readonly StaffAssignmentService $staffAssignmentService)
-    {
-    }
+    public function __construct(private readonly StaffAssignmentService $staffAssignmentService) {}
 
     public function index(): View
     {
@@ -62,7 +60,7 @@ class SpaController extends Controller
     }
 
     /**
-     * @param list<string> $images
+     * @param  list<string>  $images
      * @return list<string>
      */
     private function resolveGalleryImages(array $images): array

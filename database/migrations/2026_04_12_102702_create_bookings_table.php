@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
-            
+
             $table->index('booking_date');
             $table->index('status');
         });

@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
-use App\Models\Review;
+use App\Services\StaffAssignmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BookingHistoryController extends Controller
 {
+    public function __construct(private readonly StaffAssignmentService $staffAssignmentService) {}
+
     public function index()
     {
         $user = Auth::user();
@@ -47,9 +49,32 @@ class BookingHistoryController extends Controller
             'new_time' => 'required|date_format:H:i',
         ]);
 
+        if (! in_array($booking->status, ['pending', 'confirmed'], true)) {
+            return back()->withErrors('Only pending or confirmed bookings can be rescheduled.');
+        }
+
+        $service = $booking->service;
+
+        if (! $service) {
+            return back()->withErrors('Booking service is missing and cannot be rescheduled.');
+        }
+
+        $resolvedStaffId = $this->staffAssignmentService->resolveStaffId(
+            $service,
+            $validated['new_date'],
+            $validated['new_time'],
+            $booking->preferred_staff_id,
+        );
+
+        if (! $resolvedStaffId) {
+            return back()->withErrors('Selected slot is no longer available. Please pick another time.');
+        }
+
         $booking->update([
             'booking_date' => $validated['new_date'],
             'booking_time' => $validated['new_time'],
+            'staff_id' => $resolvedStaffId,
+            'reminder_sent_at' => null,
         ]);
 
         return back()->with('success', 'Booking rescheduled successfully!');
@@ -67,7 +92,8 @@ class BookingHistoryController extends Controller
 
         $booking->update([
             'status' => 'cancelled',
-            'notes' => 'Cancelled by customer. Reason: ' . ($validated['reason'] ?? 'No reason provided'),
+            'cancelled_at' => now(),
+            'notes' => 'Cancelled by customer. Reason: '.($validated['reason'] ?? 'No reason provided'),
         ]);
 
         return back()->with('success', 'Booking cancelled successfully.');

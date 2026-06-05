@@ -28,6 +28,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'is_admin' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -44,19 +45,19 @@ class User extends Authenticatable
             ->implode('');
     }
 
-        /**
-         * Get user bookings
-         */
-        public function bookings()
-        {
-            return $this->hasMany(Booking::class);
-        }
+    /**
+     * Get user bookings
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
 
-        /**
-         * Get user reviews
-         */
-        public function reviews()
-        {
-            return $this->hasMany(Review::class);
-        }
+    /**
+     * Get user reviews
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

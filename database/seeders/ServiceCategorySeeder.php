@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\ServiceCategory;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class ServiceCategorySeeder extends Seeder
 {
@@ -53,7 +53,7 @@ class ServiceCategorySeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
-            $slug = \Illuminate\Support\Str::slug($category['name']);
+            $slug = Str::slug($category['name']);
             ServiceCategory::firstOrCreate(
                 ['name' => $category['name']],
                 array_merge($category, ['slug' => $slug])

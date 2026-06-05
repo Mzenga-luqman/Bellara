@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Booking;
 use App\Mail\BookingConfirmation;
+use App\Models\Booking;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
@@ -44,7 +44,7 @@ class BookingObserver
     private function sendConfirmationSafely(Booking $booking, string $recipientEmail, string $event): void
     {
         try {
-            Mail::to($recipientEmail)->send(new BookingConfirmation($booking));
+            Mail::to($recipientEmail)->queue(new BookingConfirmation($booking));
         } catch (Throwable $e) {
             Log::warning('Booking confirmation email failed.', [
                 'booking_id' => $booking->id,
